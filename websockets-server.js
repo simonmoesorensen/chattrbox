@@ -6,11 +6,16 @@ var ws = new WebSocketServer({
 });
 
 var messages = [];
+var current_topic = "";
 
 console.log('websockets server started');
 
 ws.on('connection', function (socket) {
   console.log('client connection established');
+
+  if (current_topic) {
+    socket.send("*** Topic is '" + current_topic + "'");
+  }
 
   messages.forEach(function (msg) {
     socket.send(msg);
@@ -18,10 +23,19 @@ ws.on('connection', function (socket) {
 
   socket.on('message', function (data) {
     console.log('message recieved: ' + data);
-    messages.push(data);
+
+    if (data.startsWith("/topic")) {
+      current_topic = data.substring(7);
+    } else {
+      messages.push(data);
+    }
 
     ws.clients.forEach(function (clientSocket) {
-      clientSocket.send(data);
+      if (data.startsWith("/topic")) {
+        clientSocket.send("*** Topic has changed to '" + current_topic + "'");
+      } else {
+        clientSocket.send(data);
+      }
     });
   })
 });
