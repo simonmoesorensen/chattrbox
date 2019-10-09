@@ -8,7 +8,7 @@ var wss = require('./websockets-server');
 var handleError = function(err, res) {
   res.writeHead(404);
 
-  fs.readFile("./app/error.html", function(err, data) {
+  fs.readFile("error.html", function(err, data) {
     if (err) {
       throw err;
     } else {
@@ -18,15 +18,12 @@ var handleError = function(err, res) {
 };
 
 var server = http.createServer(function(req, res) {
-  console.log('Responding to a request.');
   var filePath = extract(req.url);
   fs.readFile(filePath, function(err, data) {
     if (err) {
       handleError(err, res);
       return;
     } else {
-      console.log('path ' + filePath);
-      console.log('mime ' + mime.getType(filePath))
       res.setHeader('Content-Type', mime.getType(filePath));
       res.end(data);
     }
